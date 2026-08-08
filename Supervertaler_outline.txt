@@ -1,0 +1,96 @@
+68: def _import_language_pairs():
+76: def _select_lang_in_combo(combo, value):
+93: def get_resource_path(relative_path: str) -> Path:
+104: def get_config_pointer_path() -> Path:
+128: def get_default_user_data_path() -> Path:
+141: def save_user_data_path(path: Path) -> None:
+151: def load_user_data_path_from_config() -> Optional[Path]:
+174: def get_user_data_path() -> Path:
+219: def needs_first_run_data_dialog() -> bool:
+357: def cleanup_hotkey_processes():
+391: def runs_to_tagged_text(paragraphs) -> str:
+454: def strip_formatting_tags(text: str) -> str:
+468: def strip_outer_wrapping_tags(text: str) -> tuple:
+547: def get_docx_language_code(lang_name_or_code: str) -> str:
+700: def set_docx_language(doc, lang_code: str):
+793: def has_formatting_tags(text: str) -> bool:
+807: def apply_formatting_tags(text: str, tag: str) -> str:
+823: def get_formatted_html_display(text: str) -> str:
+869: def tagged_text_to_runs(text: str) -> list:
+956: def extract_memoq_tags(text: str) -> list:
+980: def extract_html_tags(text: str) -> list:
+1003: def compact_tags(text: str, tag_map: dict = None) -> str:
+1110: def protect_tags_from_linebreak(text: str) -> str:
+1122: def expand_compact_tags(text: str, tag_map: dict) -> str:
+1148: def extract_all_tags(text: str) -> list:
+1175: def autotag_extract_tags(text: str) -> list:
+1181: def strip_all_tags(text: str) -> str:
+1190: def _normalize_ws_for_compare(text: str) -> str:
+1209: def _normalize_for_word_compare(text: str) -> str:
+1219: def _reinsert_tags_into_target(candidate: str, clean_target: str):
+1273: def _classify_tag(tag: str):
+1313: def _tags_well_formed(text: str) -> tuple:
+1329: def validate_tag_transfer(source_text: str, candidate_target: str, clean_target: str) -> tuple:
+1354: def place_tags_via_llm(client, prompt_manager, source_text: str, clean_target: str,
+1401: def count_pipe_symbols(text: str) -> int:
+1406: def get_next_pipe_count_needed(source_text: str, target_text: str) -> int:
+1422: def get_tag_pair(tag_number: int) -> tuple:
+1435: def find_next_unused_tag(source_text: str, target_text: str) -> str:
+1467: def get_wrapping_tag_pair(source_text: str, target_text: str) -> tuple:
+1508: def get_html_wrapping_tag_pair(source_text: str, target_text: str) -> tuple:
+1585: def strip_invisible_markers(text: str) -> str:
+1621: class Comment:
+1734: def okapi_subdoc_category(sub_doc: str) -> str:
+1756: def okapi_sidecar_options(opts):
+1776: class Segment:
+1958: class Project:
+2205: def _cleaned_modifiers(event):
+2218: class _QuitEventFilter(QObject):
+2247: class _CtrlReturnEventFilter(QObject):
+2298: class _GridArrowKeyEventFilter(QObject):
+2464: class _WheelGuard(QObject):
+2486: class _LoneCtrlEventFilter(QObject):
+2577: class GridTableEventFilter:
+2582: def _anchored_comments_at(main_window, row, field, char_pos):
+2617: def _segment_comments_for_row(main_window, row):
+2650: def _format_comment_tooltip(pairs):
+2664: def _add_open_comment_actions(editor, menu, field, click_qpoint):
+2706: class GridTextEditor(QTextEdit):
+2903: def _is_edge_trim_char(ch: str) -> bool:
+2914: def _is_cjk_char(ch: str) -> bool:
+2933: def _contains_cjk(text: str) -> bool:
+2944: def _canon_path(p: str) -> str:
+2953: def select_word_under_cursor(widget, event, doc_pos=None) -> bool:
+3023: def select_whole_segment(widget) -> bool:
+3037: def is_triple_click(widget, event) -> bool:
+3050: class ReadOnlyGridTextEditor(QTextEdit):
+4620: class TagHighlighter(QSyntaxHighlighter):
+4938: class EditableGridTextEditor(QTextEdit):
+6565: class SearchHighlightDelegate(QStyledItemDelegate):
+6656: class ClickableHighlightLabel(QLabel):
+6675: class TermbaseHighlightWidget(QLabel):
+6788: class WordWrapDelegate(QStyledItemDelegate):
+6996: class ThemeEditorDialog(QDialog):
+7213: class DetachedLogWindow(QWidget):
+7297: class AdvancedFiltersDialog(QDialog):
+7521: class ScratchpadDialog(QDialog):
+7594: class TMSearchWorker(QThread):
+7711: class PreTranslationWorker(QThread):
+8412: class ProofreadWorker(QThread):
+8572: class LiveProgressDialog(QDialog):
+8748: class _ImportProgressDialog:
+8882: class GlossaryExtractionWorker(QThread):
+8962: class SupervertalerQt(QMainWindow):
+66762: class _SearchTermHighlighter(QSyntaxHighlighter):
+66797: class _NumericTableWidgetItem(QTableWidgetItem):
+66822: class _ReadOnlyHtmlCell(QTextEdit):
+66884: class _SuperLookupSearchSignals(QObject):
+66896: class _SuperLookupSearchWorker(QRunnable):
+66990: class SuperlookupTab(QWidget):
+72236: class PinkCheckmarkCheckBox(QCheckBox):
+72316: class BlueCheckmarkCheckBox(QCheckBox):
+72396: class OrangeCheckmarkCheckBox(QCheckBox):
+72476: class CustomRadioButton(QRadioButton):
+72554: def _setup_diagnostic_log():
+72669: def _install_log_hooks():
+72755: def main():

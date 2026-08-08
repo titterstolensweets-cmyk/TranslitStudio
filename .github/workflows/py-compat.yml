@@ -1,0 +1,31 @@
+name: Python compatibility
+
+# Catches syntax that only parses on newer Python than we claim to support.
+# pyproject.toml declares `requires-python = ">=3.10"`, but development happens
+# on 3.12 — so 3.12-only syntax (e.g. PEP 701 nested same-quote f-strings) can
+# slip in and silently break the run-from-source path for users on 3.10/3.11.
+# This byte-compiles the whole app on every supported version. It's a pure
+# syntax check (compileall does not import modules), so it needs no
+# dependencies and runs in seconds.
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  compile:
+    name: Byte-compile on Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # Keep in sync with `requires-python` in pyproject.toml.
+        python-version: ["3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Byte-compile all sources (syntax check)
+        run: python -m compileall -q Supervertaler.py modules/

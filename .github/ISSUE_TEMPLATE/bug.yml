@@ -1,0 +1,66 @@
+name: Bug report
+description: Report a bug in Supervertaler Workbench
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug. Please complete **every** required field below — without your version and system details we usually can't reproduce or investigate the problem.
+  - type: textarea
+    id: version
+    attributes:
+      label: Version & system info
+      description: "In Supervertaler Workbench, open **Help → 📋 Copy Version Info** and paste the result here. It includes your version, operating system, and how you installed Supervertaler."
+      placeholder: |
+        Supervertaler Workbench v1.10.264
+        OS: Windows 11
+        Install: pip
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options:
+        - Windows
+        - macOS
+        - Linux
+    validations:
+      required: true
+  - type: dropdown
+    id: install
+    attributes:
+      label: How did you install Supervertaler?
+      options:
+        - Windows installer / .exe
+        - macOS DMG
+        - pip install
+        - From source
+        - Other / not sure
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: "Describe the bug, and what you expected to happen instead."
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. ...
+        2. ...
+        3. ...
+    validations:
+      required: true
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots or screen recording
+      description: "Optional but very helpful — you can drag images straight into this box."
+    validations:
+      required: false

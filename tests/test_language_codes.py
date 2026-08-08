@@ -1,0 +1,145 @@
+"""Canonical language-normalisation authority + back-compat shim contracts.
+
+This guards the fix for the recurring "no results when From/To is set" bugs:
+all language normalisation now flows through modules.language_codes, and the
+legacy helpers (tmx_generator, lang_to_code) delegate to it. If anyone
+reintroduces a divergent name↔code table or breaks a helper's contract, this
+test fails.
+"""
+
+from __future__ import annotations
+
+import os
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from modules import language_codes as lc
+from modules.tmx_generator import (
+    get_base_lang_code,
+    get_lang_match_variants,
+    get_simple_lang_code,
+    languages_are_compatible,
+    normalize_lang_variant,
+)
+from modules.bilingual_markdown_handler import lang_to_code
+
+
+# Every one of these spellings of Dutch must collapse to the same base code.
+DUTCH_FORMS = [
+    "nl", "NL", "nl-NL", "nl-BE", "nl_BE", "NL-be",
+    "Dutch", "dutch", "Dutch (Netherlands)", "Dutch (Belgium)",
+    "Flemish", "nld", "dut",
+]
+
+
+def test_all_dutch_spellings_share_a_base_code():
+    for form in DUTCH_FORMS:
+        assert lc.base_code(form) == "nl", form
+
+
+def test_canonical_preserves_region_but_normalises_form():
+    assert lc.canonical("Dutch") == "nl"
+    assert lc.canonical("nl_be") == "nl-BE"
+    assert lc.canonical("NL-be") == "nl-BE"
+    assert lc.canonical("Dutch (Belgium)") == "nl-BE"
+    assert lc.canonical("Dutch (Netherlands)") == "nl-NL"
+    assert lc.canonical("en-us") == "en-US"
+    assert lc.canonical("English") == "en"
+    assert lc.canonical("") == ""
+
+
+def test_same_language_matches_on_base_but_can_be_region_strict():
+    # Base matching (default) — the whole point: variants never miss.
+    assert lc.same_language("nl-BE", "nl-NL")
+    assert lc.same_language("nl-BE", "Dutch")
+    assert lc.same_language("Dutch (Belgium)", "nl")
+    assert lc.same_language("en-GB", "en-US")
+    # Different languages never match.
+    assert not lc.same_language("nl", "en")
+    assert not lc.same_language("Dutch", "German")
+    # Region-strict when explicitly requested.
+    assert lc.same_language("nl-BE", "nl-BE", region=True)
+    assert not lc.same_language("nl-BE", "nl-NL", region=True)
+    # Empty never matches anything.
+    assert not lc.same_language("", "nl")
+
+
+def test_match_variants_cover_code_and_name():
+    v = lc.match_variants("Dutch (Belgium)")
+    assert "nl" in v and "Dutch" in v and "nl-BE" in v
+    assert lc.match_variants("") == []
+
+
+def test_english_and_display_names():
+    assert lc.english_name("nl-BE") == "Dutch"
+    assert lc.english_name("Dutch") == "Dutch"
+    assert lc.english_name("zh-TW") == "Chinese (Traditional)"
+    assert lc.english_name("xx-YY") is None
+    assert lc.display_name("nl-BE") == "Dutch (BE)"
+    assert lc.display_name("nl") == "Dutch"
+
+
+# --- Back-compat shim contracts (the ~hundreds of existing call sites) -------
+
+def test_get_base_lang_code_contract():
+    assert get_base_lang_code("Dutch") == "nl"
+    assert get_base_lang_code("en-US") == "en"
+    assert get_base_lang_code("nl-BE") == "nl"
+    assert get_base_lang_code("") == "en"   # legacy default
+
+
+def test_get_simple_lang_code_contract():
+    assert get_simple_lang_code("Dutch") == "nl"
+    assert get_simple_lang_code("nl") == "nl"
+    assert get_simple_lang_code("en-US") == "en-US"
+    assert get_simple_lang_code("nl_BE") == "nl-BE"
+    assert get_simple_lang_code("") == "en"   # legacy default
+
+
+def test_get_lang_match_variants_contract():
+    v = get_lang_match_variants("nl")
+    assert "nl" in v and "Dutch" in v
+    assert get_lang_match_variants("") == ["en", "English"]
+
+
+def test_normalize_lang_variant_contract():
+    assert normalize_lang_variant("nl-be") == "nl-BE"
+    assert normalize_lang_variant("NL-NL") == "nl-NL"
+    assert normalize_lang_variant("nl") == "nl"
+
+
+def test_languages_are_compatible_contract():
+    assert languages_are_compatible("nl-BE", "Dutch")
+    assert languages_are_compatible("en-GB", "en-US")
+    assert not languages_are_compatible("nl", "en")
+
+
+def test_lang_to_code_contract():
+    assert lang_to_code("English (US)") == "EN"
+    assert lang_to_code("en-GB") == "EN"
+    assert lang_to_code("Dutch") == "NL"
+    assert lang_to_code("") == "??"
+
+
+def test_the_actual_bug_that_started_this():
+    # SuperLookup passed 'Dutch'/'English' (or 'nl-BE') while TM rows were
+    # tagged 'nl'/'en'. Base-code matching must bridge them.
+    assert lc.same_language("Dutch", "nl")
+    assert lc.same_language("nl-BE", "nl")
+    assert lc.base_code("Dutch") == lc.base_code("nl-NL") == "nl"
+
+
+def test_available_pairs_covers_picker_languages():
+    """Guards the import-dialog language fix (v1.10.261): the canonical picker
+    set must include the languages the old hardcoded 12-item list dropped, and
+    base_code must resolve code/name/region forms to the same picker code, so a
+    project's language can't silently fall back to English on import."""
+    from modules.language_codes import available_pairs, base_code
+    pairs = available_pairs()
+    codes = {c for _, c in pairs}
+    for code in ("sk", "cs", "uk", "ru", "en", "nl"):
+        assert code in codes, f"{code} missing from available_pairs()"
+    assert ("Slovak", "sk") in pairs
+    assert [n for n, _ in pairs] == sorted((n for n, _ in pairs), key=str.lower)
+    assert base_code("sk") == base_code("Slovak") == base_code("sk-SK") == "sk"

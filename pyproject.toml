@@ -1,0 +1,131 @@
+[build-system]
+requires = ["setuptools>=65.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "supervertaler"
+version = "1.10.369"
+description = "Professional AI-enhanced translation workbench with multi-LLM support, termbase system, TM, spellcheck, voice commands, and PyQt6 interface. Batteries included (core)."
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [
+    {name = "Michael Beijer", email = "support@supervertaler.com"},
+]
+maintainers = [
+    {name = "Michael Beijer", email = "support@supervertaler.com"},
+]
+keywords = [
+    "translation",
+    "CAT",
+    "CAT-tool",
+    "AI",
+    "LLM",
+    "GPT",
+    "Claude",
+    "Gemini",
+    "Ollama",
+    "glossary",
+    "termbase",
+    "translation-memory",
+    "TM",
+    "PyQt6",
+    "localization",
+    "memoQ",
+    "Trados",
+    "SDLPPX",
+    "XLIFF",
+    "voice-commands",
+    "spellcheck",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: OS Independent",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+    "Intended Audience :: End Users/Desktop",
+    "Topic :: Office/Business",
+    "Topic :: Text Processing :: Linguistic",
+    "Environment :: X11 Applications :: Qt",
+]
+
+dependencies = [
+    "setuptools>=68.0",
+    "wheel>=0.41.0",
+    "PyQt6>=6.5.0",
+    "PyQt6-WebEngine>=6.5.0",
+    "python-docx>=0.8.11",
+    "openpyxl>=3.1.0",
+    "Pillow>=10.0.0",
+    "lxml>=4.9.0",
+    "openai>=1.0.0",
+    "anthropic>=0.7.0",
+    "google-generativeai>=0.3.0",
+    "requests>=2.28.0",
+    "markitdown>=0.0.1",
+    "sacrebleu>=2.3.1",
+    "pyperclip>=1.8.2",
+    "chardet>=5.0.0",
+    "pyyaml>=6.0.0",
+    "markdown>=3.4.0",
+    "pyspellchecker>=0.7.0",
+    "numpy>=1.24.0",
+    "PyMuPDF>=1.23.0",
+    "boto3>=1.28.0",
+    "deepl>=1.15.0",
+    "spylls>=0.1.7",
+    "psutil>=5.9.0",
+    "pynput>=1.7.6",
+    "ahk>=1.0.0; sys_platform == 'win32'",
+    "pyobjc-framework-Cocoa>=10.0; sys_platform == 'darwin'",
+]
+
+[project.optional-dependencies]
+# All extras kept as no-ops for backward compatibility – installing
+# ``supervertaler[local-whisper]`` is harmless on existing setups but
+# the underlying package is now a core dep. Since v1.9.474 the
+# Workbench has stopped advertising any modular install paths;
+# `pip install supervertaler` gives the full surface area in one go.
+# The empty buckets are preserved here only so existing scripts that
+# request specific extras don't fail at install time.
+local-whisper = []
+voice = []
+web = []
+pdf = []
+mt = []
+hunspell = []
+windows = []
+core = []
+all = []
+
+[project.urls]
+Homepage = "https://supervertaler.com"
+Repository = "https://github.com/Supervertaler/Supervertaler-Workbench.git"
+"Bug Tracker" = "https://github.com/Supervertaler/Supervertaler-Workbench/issues"
+Changelog = "https://github.com/Supervertaler/Supervertaler-Workbench/blob/main/CHANGELOG.md"
+Documentation = "https://github.com/Supervertaler/Supervertaler-Workbench/blob/main/AGENTS.md"
+"Author Website" = "https://beijer.uk"
+
+[project.gui-scripts]
+# Normal launcher — Windows GUI subsystem, no terminal window attached.
+# Most users want this: pip-installed `supervertaler` runs silently.
+supervertaler = "Supervertaler:main"
+
+[project.scripts]
+# Debug launcher — Windows console subsystem, terminal window visible so
+# stdout/stderr (all the [LOG] lines) are usable. Invoke via
+# `supervertaler-debug` when you need to see crashes or diagnostic output.
+supervertaler-debug = "Supervertaler:main"
+
+[tool.setuptools]
+py-modules = ["Supervertaler"]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["modules*"]
