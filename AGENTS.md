@@ -2,6 +2,37 @@
 
 Concise project reference for AI-assisted development. Check `CHANGELOG.md` for latest version and recent work.
 
+## ⚠️ CRITICAL: Working Environment Constraints
+
+**Read this before doing anything!**
+
+You are working in **Qwen Coder's cloud container** (headless Linux). This environment:
+- ❌ **Has NO display server** (no X11/Wayland) — PyQt6 GUI cannot start here
+- ❌ **Has limited disk space** — installing PyQt6 (~500MB) often fails with "no space left"
+- ✅ **Can read, analyze, and edit Python files perfectly**
+- ✅ **Can run non-GUI Python scripts** (tests, refactoring, code analysis)
+
+### 🚫 DO NOT:
+- Do NOT run `pip install PyQt6` or `pip install PyQt6-WebEngine`
+- Do NOT run `python Supervertaler.py` or any script that imports PyQt6
+- Do NOT attempt to start/test the GUI application
+- Do NOT install heavy dependencies "just to check"
+
+### ✅ DO:
+- Analyze code structure and dependencies
+- Edit files (remove CAT Tools / Voice Commands references)
+- Run `pytest tests/` if tests exist (they don't use PyQt6 directly)
+- Run utility scripts that don't import PyQt6
+- Suggest architectural improvements
+
+**The user tests the GUI locally on their Windows machine.** Your job is to write correct code that they will run there.
+
+If you're unsure whether a command will try to start the GUI — **ask the user first**.
+
+---
+
+Concise project reference for AI-assisted development. Check `CHANGELOG.md` for latest version and recent work.
+
 ## Project Overview
 
 Supervertaler is a desktop AI-enhanced translation workbench built with PyQt6. It combines AI translation (multiple LLM providers), translation memory, terminology management, and quality assurance in a single application.
