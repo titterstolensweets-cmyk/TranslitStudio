@@ -1,0 +1,382 @@
+# ѕолный отчЄт: блоки кода, св€занные с удалЄнными модул€ми
+
+## ЅЋќ  1: `_count_source_segments()` Ч хелпер статистики
+
+**—троки 13482Ц13493** Ч обработка `.sdlxliff` и `.mqxliff` внутри `if`-блока:
+```python
+if ext == '.sdlxliff':
+    from modules.sdlppx_handler import StandaloneSDLXLIFFHandler
+    h = StandaloneSDLXLIFFHandler()
+    h.load([file_path])
+    return [s.source_text for s in h.get_all_segments()
+            if getattr(s, 'source_text', '').strip()]
+if ext == '.mqxliff':
+    from modules.mqxliff_handler import MQXLIFFHandler
+    h = MQXLIFFHandler()
+    h.load(file_path)
+    return [s.plain_text for s in h.extract_source_segments()
+            if getattr(s, 'plain_text', '').strip()]
+```
+
+**—трока 13506** Ч фильтр в `show_quick_statistics_dialog()`:
+```python
+("memoQ bilingual", "*.mqxliff"),
+```
+
+---
+
+## ЅЋќ  2: `_build_file_menu()` Ч пункты меню
+
+**—троки 11489Ц11502** Ч memoQ submenu (импорт RTF и XLIFF):
+```python
+memoq_submenu = import_menu.addMenu(self.tr("&memoQ"))
+import_memoq_rtf_action = QAction(self.tr("Bilingual Table (&RTF)..."), self)
+import_memoq_rtf_action.triggered.connect(self.import_memoq_rtf)
+memoq_submenu.addAction(import_memoq_rtf_action)
+import_memoq_xliff_action = QAction(self.tr("&XLIFF (.mqxliff)..."), self)
+import_memoq_xliff_action.triggered.connect(self.import_memoq_xliff)
+memoq_submenu.addAction(import_memoq_xliff_action)
+```
+
+**—троки 11504Ц11508** Ч CafeTran submenu (импорт):
+```python
+cafetran_submenu = import_menu.addMenu(self.tr("&CafeTran"))
+import_cafetran_action = QAction(self.tr("Bilingual &Table (DOCX)..."), self)
+import_cafetran_action.triggered.connect(self.import_cafetran_bilingual)
+cafetran_submenu.addAction(import_cafetran_action)
+```
+
+**—троки 11510Ц11527** Ч Trados Studio submenu (импорт SDLPPX/XLIFF/Folder):
+```python
+trados_submenu = import_menu.addMenu(self.tr("&Trados Studio"))
+...
+import_sdlxliff_action = QAction(self.tr("Bilingual &XLIFF (.sdlxliff)..."), self)
+import_sdlxliff_action.triggered.connect(self.import_standalone_sdlxliff)
+trados_submenu.addAction(import_sdlxliff_action)
+import_sdlxliff_folder_action = QAction(self.tr("Bilingual XLIFF &Folder (.sdlxliff)..."), self)
+import_sdlxliff_folder_action.triggered.connect(self.import_sdlxliff_folder)
+trados_submenu.addAction(import_sdlxliff_folder_action)
+import_sdlppx_action = QAction(self.tr("&Package (SDLPPX)..."), self)
+import_sdlppx_action.triggered.connect(self.import_sdlppx_package)
+trados_submenu.addAction(import_sdlppx_action)
+```
+
+**—троки 11529Ц11539** Ч Phrase и Deja Vu submenu (импорт):
+```python
+phrase_submenu = import_menu.addMenu(self.tr("&Phrase (Memsource)"))
+import_phrase_bilingual_action = QAction(self.tr("&Bilingual (DOCX)..."), self)
+import_phrase_bilingual_action.triggered.connect(self.import_phrase_bilingual)
+phrase_submenu.addAction(import_phrase_bilingual_action)
+dejavu_submenu = import_menu.addMenu(self.tr("&Deja Vu X3"))
+import_dejavu_action = QAction(self.tr("&Bilingual (RTF)..."), self)
+import_dejavu_action.triggered.connect(self.import_dejavu_bilingual)
+dejavu_submenu.addAction(import_dejavu_action)
+```
+
+**—троки 11601Ц11614** Ч memoQ export submenu (RTF и XLIFF):
+```python
+memoq_export_submenu = export_menu.addMenu(self.tr("&memoQ"))
+export_memoq_rtf_action = QAction(self.tr("Bilingual Table - Translated (&RTF)..."), self)
+export_memoq_rtf_action.triggered.connect(self.export_memoq_rtf)
+memoq_export_submenu.addAction(export_memoq_rtf_action)
+export_memoq_xliff_action = QAction(self.tr("&XLIFF - Translated (.mqxliff)..."), self)
+export_memoq_xliff_action.triggered.connect(self.export_memoq_xliff)
+memoq_export_submenu.addAction(export_memoq_xliff_action)
+```
+
+**—троки 11616Ц11620** Ч CafeTran export submenu:
+```python
+cafetran_export_submenu = export_menu.addMenu(self.tr("&CafeTran"))
+export_cafetran_action = QAction(self.tr("Bilingual &Table - Translated (DOCX)..."), self)
+export_cafetran_action.triggered.connect(self.export_cafetran_bilingual)
+cafetran_export_submenu.addAction(export_cafetran_action)
+```
+
+**—троки 11622Ц11635** Ч Trados Studio export submenu (SDLXLIFF/SDLRPX):
+```python
+trados_export_submenu = export_menu.addMenu(self.tr("&Trados Studio"))
+...
+export_sdlxliff_action = QAction(self.tr("Bilingual &XLIFF - Translated (.sdlxliff)..."), self)
+export_sdlxliff_action.triggered.connect(self.export_standalone_sdlxliff)
+trados_export_submenu.addAction(export_sdlxliff_action)
+export_sdlrpx_action = QAction(self.tr("Return &Package (SDLRPX)..."), self)
+export_sdlrpx_action.triggered.connect(self.export_sdlrpx_package)
+trados_export_submenu.addAction(export_sdlrpx_action)
+```
+
+**—троки 11637Ц11641** Ч Phrase export submenu:
+```python
+phrase_export_submenu = export_menu.addMenu(self.tr("&Phrase (Memsource)"))
+export_phrase_bilingual_action = QAction(self.tr("&Bilingual - Translated (DOCX)..."), self)
+export_phrase_bilingual_action.triggered.connect(self.export_phrase_bilingual)
+phrase_export_submenu.addAction(export_phrase_bilingual_action)
+```
+
+**—троки 11649Ц11653** Ч Deja Vu export submenu:
+```python
+dejavu_export_submenu = export_menu.addMenu(self.tr("&Deja Vu X3"))
+export_dejavu_action = QAction(self.tr("&Bilingual - Translated (RTF)..."), self)
+export_dejavu_action.triggered.connect(self.export_dejavu_bilingual)
+dejavu_export_submenu.addAction(export_dejavu_action)
+```
+
+---
+
+## ЅЋќ  3: ћетоды импорта (удалить целиком)
+
+### 3.1 `import_memoq_rtf` > строки **39263Ц39500**
+”дал€ть: `def import_memoq_rtf(self):` ... до строки перед следующим методом
+
+### 3.2 `import_memoq_xliff` > строки **39916Ц40064**
+”дал€ть: `def import_memoq_xliff(self):` ... до строки `_normalize_language_code`
+
+### 3.3 `import_cafetran_bilingual` > строки **40531Ц40680**
+”дал€ть: `def import_cafetran_bilingual(self):` ... до строки `def import_trados_bilingual(self):`
+
+### 3.4 `import_trados_bilingual` (docx) > строки **40681Ц40949**
+”дал€ть: `def import_trados_bilingual(self):` ... до строки `def export_trados_bilingual(self):`
+
+### 3.5 `import_sdlppx_package` > строки **41094Ц41508**
+”дал€ть: `def import_sdlppx_package(self):` ... до строки `def export_sdlrpx_package(self):`
+
+### 3.6 `import_standalone_sdlxliff` > строки **41757Ц41964**
+”дал€ть: `def import_standalone_sdlxliff(self):` ... до строки `def import_sdlxliff_folder(self):`
+
+### 3.7 `import_sdlxliff_folder` > строки **41965Ц42167**
+”дал€ть: `def import_sdlxliff_folder(self):` ... до строки `def export_standalone_sdlxliff(self):`
+
+### 3.8 `import_phrase_bilingual` > строки **42318Ц42602**
+”дал€ть: `def import_phrase_bilingual(self):` ... до строки `def export_phrase_bilingual(self):`
+
+### 3.9 `import_dejavu_bilingual` > строки **42778Ц42942**
+”дал€ть: `def import_dejavu_bilingual(self):` ... до строки `def export_dejavu_bilingual(self):`
+
+---
+
+## ЅЋќ  4: ћетоды экспорта (удалить целиком)
+
+### 4.1 `export_memoq_rtf` > строки **40073Ц40190**
+”дал€ть: `def export_memoq_rtf(self):` ... до строки `def export_memoq_xliff(self):`
+
+### 4.2 `export_memoq_xliff` > строки **40190Ц40300**
+”дал€ть: `def export_memoq_xliff(self):` ... до строки `# ======== DECAFE ...` или следующего метода
+
+### 4.3 `export_trados_bilingual` (docx) > строки **40950Ц41093**
+”дал€ть: `def export_trados_bilingual(self):` ... до строки `def import_sdlppx_package(self):`
+
+### 4.4 `export_sdlrpx_package` > строки **41509Ц41756**
+”дал€ть: `def export_sdlrpx_package(self):` ... до строки `def import_standalone_sdlxliff(self):`
+
+### 4.5 `export_standalone_sdlxliff` > строки **42168Ц42317**
+”дал€ть: `def export_standalone_sdlxliff(self):` ... до строки `def import_phrase_bilingual(self):`
+
+### 4.6 `export_phrase_bilingual` > строки **42603Ц42777**
+”дал€ть: `def export_phrase_bilingual(self):` ... до строки `def import_dejavu_bilingual(self):`
+
+### 4.7 `export_dejavu_bilingual` > строки **42943Ц43838**
+”дал€ть: `def export_dejavu_bilingual(self):` ... до строки `def export_cafetran_bilingual(self):`
+
+### 4.8 `export_cafetran_bilingual` > строки **43838Ц...** (нужна точна€ граница)
+”дал€ть: `def export_cafetran_bilingual(self):` ... до следующего метода
+
+---
+
+## ЅЋќ  5: ѕол€ класса `Project` + сериализаци€
+
+| —трока | ƒействие |
+|--------|----------|
+| 1955 | ”далить: `mqxliff_source_path: str = None` |
+| 1956 | ”далить: `cafetran_source_path: str = None` |
+| 1957 | ”далить: `sdlppx_source_path: str = None` |
+| 2045Ц2046 | ”далить в `to_dict()`: `if self.mqxliff_source_path: result['mqxliff_source_path'] = self.mqxliff_source_path` |
+| 2047Ц2048 | ”далить в `to_dict()`: `if self.cafetran_source_path: result['cafetran_source_path'] = self.cafetran_source_path` |
+| 2049Ц2050 | ”далить в `to_dict()`: `if self.sdlppx_source_path: result['sdlppx_source_path'] = self.sdlppx_source_path` |
+| 2136Ц2137 | ”далить в `from_dict()`: восстановление `mqxliff_source_path` |
+| 2139Ц2140 | ”далить в `from_dict()`: восстановление `cafetran_source_path` |
+| 2141Ц2143 | ”далить в `from_dict()`: восстановление `sdlppx_source_path` |
+
+---
+
+## ЅЋќ  6: ѕеременные экземпл€ра `SupervertalerQt`
+
+| —трока | ѕеременна€ | ќписание |
+|--------|-----------|----------|
+| 33558Ц33563 | `sdlppx_handler`, `sdlppx_source_file` | ¬осстановление в `_restore_project_from_data()` |
+| 33585 | »мпорт `StandaloneSDLXLIFFHandler` | ¬осстановление в `_restore_project_from_data()` |
+| 39378 | `self.memoq_rtf_source_file` | »мпорт |
+| 39382 | `self.memoq_rtf_handler` | »мпорт |
+| 39414Ц39416 | `self.memoq_rtf_source_file`, `memoq_rtf_handler`, `memoq_rtf_metadata` | »мпорт RTF |
+| 39979Ц39999 | `self.mqxliff_handler`, `self.mqxliff_source_file`, `self.current_project.mqxliff_source_path` | »мпорт XLIFF |
+| 40594Ц40613 | `self.cafetran_handler`, `self.cafetran_source_file`, `self.current_project.cafetran_source_path` | »мпорт CafeTran |
+| 40785Ц40786 | `self.trados_handler`, `self.trados_source_file` | »мпорт Trados DOCX |
+| 41324Ц41326 | `self.sdlppx_handler`, `self.sdlppx_source_file`, `self.current_project.sdlppx_source_path` | »мпорт SDLPPX |
+| 41553Ц41554 | `self.sdlppx_source_file`, `self.current_project.sdlppx_source_path` | Ёкспорт SDLRPX |
+| 41778Ц41789 | `self.sdlxliff_handler`, `self.sdlxliff_source_files`, `self.current_project.sdlxliff_source_paths` | »мпорт SDLXLIFF |
+| 41992Ц42007 | јналогично `sdlxliff_handler`, `sdlxliff_source_files` | »мпорт папки |
+| 42351Ц42352 | »мпорт PhraseDOCXHandler | »мпорт Phrase |
+| 42685 | »мпорт PhraseDOCXHandler | Ёкспорт Phrase |
+| 42827Ц42830 | »мпорт DejaVuRTFHandler | »мпорт Deja Vu |
+| 43023Ц43024 | »мпорт DejaVuRTFHandler | Ёкспорт Deja Vu |
+| 43857Ц43933 | `self.cafetran_handler`, `self.cafetran_source_file` | Ёкспорт CafeTran |
+
+---
+
+## ЅЋќ  7: TagHighlighter
+
+| —трока | ƒействие |
+|--------|----------|
+| 4604 | ”далить: `_is_cafetran_project = False` |
+| 4754 | ”далить проверку `if TagHighlighter._is_cafetran_project:` |
+| 36651 | ”далить: `TagHighlighter._is_cafetran_project = False` |
+| 36984 | ”далить: `TagHighlighter._is_cafetran_project = False` |
+
+---
+
+## ЅЋќ  8: —татистика проекта
+
+| —трока | ƒействие |
+|--------|----------|
+| 54806Ц54807 | ”далить `proj.memoq_rtf_source_path, proj.mqxliff_source_path, proj.cafetran_source_path,` из списка источников |
+| 54827Ц54828 | ”далить блок отображени€ `proj.cafetran_source_path` |
+
+---
+
+## ЅЋќ  9: Auxiliary файлы
+
+‘айл	—трока	ќписание
+modules/batch_offload.py	196	from modules.sdlppx_handler import StandaloneSDLXLIFFHandler
+modules/segment_split_merge.py	41-48	_BILINGUAL_ORIGIN_ATTRS: mqxliff_source_path, cafetran_source_path, sdlppx_source_path
+tests/test_segment_delete.py	16-17	mqxliff_source_path=None, cafetran_source_path=None, sdlppx_source_path=None
+modules/chat_view_widget.py	23-25	from modules.trados_bridge_client import TradosBridgeClient, TradosBridgePoller
+modules/chat_view_widget.py	336-337, 349, 387, 399, 848, 851	»спользование TradosBridgeClient
+modules/unified_prompt_manager_qt.py	6292-6299	from modules.trados_bridge_client import TradosBridgeClient, format_context_for_prompt
+modules/supervertaler_bridge_server.py	7, 111	—троковые ссылки в комментари€х
+modules/database_manager.py	442	 омментарий про .sdltm
+modules/help_system.py	100	TM_TRADOS_SDLTM
+modules/help_system.py	94	CAT_CAFETRAN
+modules/superlookup.py	49, 70	cafetran в строках режима TM Lookup
+
+
+
+
+## ЅЋќ  10: ћетод _attach_sdltm_as_tm и _sync_external_sdltm
+—трока	ќписание
+9228	 омментарий про .sdltm в _build_tm_manager_tab
+15778Ц15785	 нопка attach_sdltm_btn в UI TM Manager
+23239Ц23526	ћетод _attach_sdltm_as_tm(self, tm_metadata_mgr, refresh_callback) Ч полный метод
+23513Ц23526	ћетод _sync_external_sdltm Ч partial/строки с импортом
+
+
+
+
+## ЅЋќ  11: _restore_project_from_data (переменной среды)
+—троки	ќписание
+33557Ц33585	Ѕлок восстановлени€ sdlppx_handler и StandaloneSDLXLIFFHandler
+»тоговый подсчЄт методов дл€ удалени€
+є	ћетод	—троки (def > def следующего)	ƒействие
+1	import_memoq_rtf	39263 > 39480 (перед _normalize_language_code)	”далить
+2	export_memoq_rtf	40073 > 40190	”далить
+3	import_memoq_xliff	39916 > 40064	”далить
+4	export_memoq_xliff	40190 > 40300	”далить
+5	import_cafetran_bilingual	40531 > 40681	”далить
+6	export_cafetran_bilingual	43838 > (нужна граница)	”далить
+7	import_trados_bilingual	40681 > 40950	”далить
+8	export_trados_bilingual	40950 > 41094	”далить
+9	import_sdlppx_package	41094 > 41509	”далить
+10	export_sdlrpx_package	41509 > 41757	”далить
+11	import_standalone_sdlxliff	41757 > 41965	”далить
+12	import_sdlxliff_folder	41965 > 42168	”далить
+13	export_standalone_sdlxliff	42168 > 42318	”далить
+14	import_phrase_bilingual	42318 > 42603	”далить
+15	export_phrase_bilingual	42603 > 42778	”далить
+16	import_dejavu_bilingual	42778 > 42943	”далить
+17	export_dejavu_bilingual	42943 > 43838	”далить
+
+
+## ЅЋќ  12: `_show_project_stats_dialog` (строки 54804-54845)
+
+| —троки | ƒействие |
+|--------|----------|
+| 54806 | ”далить `proj.cafetran_source_path,` из `any([...])` |
+| 54807 | ”далить `proj.sdlppx_source_path,` из `any([...])` |
+| 54827-54828 | ”далить блок `if proj.cafetran_source_path:` |
+| 54831-54832 | ”далить блок `if proj.sdlppx_source_path:` |
+
+---
+
+## »“ќ√ќ¬јя —¬ќƒ ј: „то нужно удалить
+
+### 1. ћетоды SupervertalerQt (17 методов, полностью)
+- `import_memoq_rtf` (39263Ц39500)
+- `export_memoq_rtf` (40073Ц40190)
+- `import_memoq_xliff` (39916Ц40064)
+- `export_memoq_xliff` (40190Ц40298)
+- `import_cafetran_bilingual` (40531Ц40680)
+- `export_cafetran_bilingual` (43838Ц...)
+- `import_trados_bilingual` (40681Ц40949)
+- `export_trados_bilingual` (40950Ц41093)
+- `import_sdlppx_package` (41094Ц41508)
+- `export_sdlrpx_package` (41509Ц41756)
+- `import_standalone_sdlxliff` (41757Ц41964)
+- `import_sdlxliff_folder` (41965Ц42167)
+- `export_standalone_sdlxliff` (42168Ц42317)
+- `import_phrase_bilingual` (42318Ц42602)
+- `export_phrase_bilingual` (42603Ц42777)
+- `import_dejavu_bilingual` (42778Ц42942)
+- `export_dejavu_bilingual` (42943Ц43838)
+
+### 2. ѕол€ класса Project + to_dict/from_dict (9 строк)
+- 1955, 1956, 1957 (пол€)
+- 2045Ц2050 (to_dict)
+- 2136Ц2143 (from_dict)
+
+### 3. ћеню File (14 QAction-блоков + 9 addMenu)
+- —троки 11489Ц11502 (memoQ импорт)
+- —троки 11504Ц11508 (CafeTran импорт)
+- —троки 11510Ц11527 (Trados импорт)
+- —троки 11529Ц11539 (Phrase, Deja Vu импорт)
+- —троки 11601Ц11614 (memoQ экспорт)
+- —троки 11616Ц11620 (CafeTran экспорт)
+- —троки 11622Ц11635 (Trados экспорт)
+- —троки 11637Ц11641 (Phrase экспорт)
+- —троки 11649Ц11653 (Deja Vu экспорт)
+
+### 4. TagHighlighter (4 блока)
+- 4604 (объ€вление)
+- 4754 (проверка)
+- 36651, 36984 (сброс)
+
+### 5. ѕеременные экземпл€ра (~20 мест по всему коду)
+- `self.sdlppx_handler`, `self.sdlppx_source_file`
+- `self.mqxliff_handler`, `self.mqxliff_source_file`
+- `self.cafetran_handler`, `self.cafetran_source_file`
+- `self.trados_handler`, `self.trados_source_file`
+- `self.memoq_rtf_handler`, `self.memoq_rtf_source_file`, `self.memoq_rtf_metadata`
+- `self.phrase_handler`, `self.phrase_source_file`
+- `self.dejavu_handler`, `self.dejavu_source_file`
+- `self.sdlxliff_handler`, `self.sdlxliff_source_files`
+
+### 6. —татистика проекта (строки 54804Ц54845)
+- 54806Ц54807 (any([...]))
+- 54827Ц54828 (CafeTran в UI)
+- 54831Ц54832 (SDLPPX в UI)
+
+### 7. ’елпер статистики (строки 13482Ц13494)
+- `.sdlxliff` и `.mqxliff` блоки в `_count_source_segments()`
+
+### 8. UI TM Manager (строки 15778Ц15785)
+-  нопка "Attach Trados TM"
+
+### 9. ћетоды _attach_sdltm_as_tm, _sync_external_sdltm
+- —троки 23239Ц23526 (и далее)
+
+### 10. Auxiliary файлы
+- `modules/batch_offload.py` (строка 196)
+- `modules/segment_split_merge.py` (строки 41Ц48)
+- `tests/test_segment_delete.py` (строки 16Ц17)
+- `modules/chat_view_widget.py` (17 строк)
+- `modules/unified_prompt_manager_qt.py` (строки 6292Ц6299)
+- `modules/supervertaler_bridge_server.py` (2 строки)
+- `modules/help_system.py` (2 строки)
+- `modules/superlookup.py` (2 строки)
+- `modules/database_manager.py` (1 строка)
