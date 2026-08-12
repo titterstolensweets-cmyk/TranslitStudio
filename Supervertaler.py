@@ -241,6 +241,8 @@ from modules.superlookup import SuperlookupEngine  # Superlookup engine
 from modules.pseudo_translate_dialog import run_pseudo_translation  # Pseudo-translation export test (dialog + apply)
 from modules.project_assets import bundle_source, resolve_source_path, ensure_target_dir, nest_in_own_folder  # Project-folder model (issue #228)
 from modules.voice_dictation_lite import QuickDictationThread  # Voice dictation
+from modules.voice_commands import VoiceCommandManager, VoiceCommand, ContinuousVoiceListener  # Voice commands (Talon-style)
+from modules.voice_command_dialog import VoiceCommandEditDialog  # Voice command edit dialog
 from modules.styled_widgets import CheckmarkCheckBox, PurpleCheckmarkCheckBox, TealCheckmarkCheckBox, CheckmarkRadioButton
 from modules.statuses import (
     STATUSES,
@@ -13478,11 +13480,17 @@ class SupervertalerQt(QMainWindow):
                     for s in result.get('segments', [])
                     if (s.get('source') or '').strip()]
         if ext == '.sdlxliff':
-            self.log("⚠ SDLXLIFF handling requires sdlppx_handler module which has been removed")
-            return []
+            from modules.sdlppx_handler import StandaloneSDLXLIFFHandler
+            h = StandaloneSDLXLIFFHandler()
+            h.load([file_path])
+            return [s.source_text for s in h.get_all_segments()
+                    if getattr(s, 'source_text', '').strip()]
         if ext == '.mqxliff':
-            self.log("⚠ MQXLIFF handling requires mqxliff_handler module which has been removed")
-            return []
+            from modules.mqxliff_handler import MQXLIFFHandler
+            h = MQXLIFFHandler()
+            h.load(file_path)
+            return [s.plain_text for s in h.extract_source_segments()
+                    if getattr(s, 'plain_text', '').strip()]
         raise ValueError(f"Unsupported file type: {ext or '(none)'}")
 
     def show_quick_statistics_dialog(self):
@@ -15085,21 +15093,17 @@ class SupervertalerQt(QMainWindow):
         Same widget Sidekick uses (modules.voice_tab.VoiceTab); it reads
         parent_app properties (shortcut_manager, voice_listener,
         load_dictation_settings) so the existing wiring just works.
-        NOTE: Voice tab module removed - this method is now a no-op.
         """
         if self._voice_top_widget is not None:
             return
         try:
-            # VoiceTab module has been removed
-            self.log("⚠ Voice tab functionality has been removed")
+            from modules.voice_tab import VoiceTab
+            widget = VoiceTab(self)
+            self._voice_top_widget = widget
             placeholder = self.main_tabs.widget(self.voice_tab_index)
             layout = QVBoxLayout(placeholder)
             layout.setContentsMargins(0, 0, 0, 0)
-            # Add placeholder label instead of VoiceTab
-            from PyQt6.QtWidgets import QLabel
-            label = QLabel("Voice commands functionality has been removed")
-            label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            layout.addWidget(label)
+            layout.addWidget(widget)
         except Exception as e:
             self.log(f"⚠ Could not build Voice top tab: {e}")
             import traceback
@@ -33551,24 +33555,50 @@ class SupervertalerQt(QMainWindow):
                     self.log(f"⚠️ Original DOCX not found (export will rebuild from segments): {stored_source}")
             
             # Restore SDLPPX handler for Trados package projects
-            # NOTE: sdlppx_handler module has been removed
             if hasattr(self.current_project, 'sdlppx_source_path') and self.current_project.sdlppx_source_path:
                 sdlppx_path = self.current_project.sdlppx_source_path
                 if os.path.exists(sdlppx_path):
-                    self.log(f"⚠️ SDLPPX package found but sdlppx_handler module has been removed: {sdlppx_path}")
+                    try:
+                        from modules.sdlppx_handler import TradosPackageHandler
+                        self.sdlppx_handler = TradosPackageHandler(log_callback=self.log)
+                        package = self.sdlppx_handler.load_package(sdlppx_path)
+                        if package:
+                            self.sdlppx_source_file = sdlppx_path  # Store source file path for export
+                            self.log(f"✓ Restored Trados package handler: {Path(sdlppx_path).name}")
+                            self.log(f"  → SDLRPX export enabled for this project")
+                        else:
+                            self.log(f"⚠️ Could not load SDLPPX package: {sdlppx_path}")
+                            self.sdlppx_handler = None
+                    except Exception as e:
+                        self.log(f"⚠️ Could not restore SDLPPX handler: {e}")
+                        self.sdlppx_handler = None
                 else:
                     self.log(f"⚠️ SDLPPX package not found: {sdlppx_path}")
+                    self.sdlppx_handler = None
 
             # Restore standalone SDLXLIFF handler
-            # NOTE: sdlppx_handler module has been removed
             sdlxliff_paths = getattr(self.current_project, 'sdlxliff_source_paths', None)
             if sdlxliff_paths:
                 existing = [p for p in sdlxliff_paths if os.path.exists(p)]
                 if existing:
-                    self.log(f"⚠️ SDLXLIFF files found but sdlppx_handler module has been removed: {len(existing)} file(s)")
+                    try:
+                        from modules.sdlppx_handler import StandaloneSDLXLIFFHandler
+                        handler = StandaloneSDLXLIFFHandler(log_callback=self.log)
+                        if handler.load(existing):
+                            self.sdlxliff_handler = handler
+                            self.sdlxliff_source_files = existing
+                            self.log(f"✓ Restored SDLXLIFF handler: {len(existing)} file(s)")
+                            self.log(f"  → SDLXLIFF export enabled for this project")
+                        else:
+                            self.log(f"⚠️ Could not reload SDLXLIFF files")
+                            self.sdlxliff_handler = None
+                    except Exception as e:
+                        self.log(f"⚠️ Could not restore SDLXLIFF handler: {e}")
+                        self.sdlxliff_handler = None
                 else:
                     missing = [Path(p).name for p in sdlxliff_paths if not os.path.exists(p)]
                     self.log(f"⚠️ SDLXLIFF source file(s) not found: {', '.join(missing)}")
+                    self.sdlxliff_handler = None
 
             seg_count = len(self.current_project.segments) if self.current_project else 0
             progress.setLabelText(f"Loading {seg_count:,} segments into grid…")
@@ -39903,13 +39933,51 @@ class SupervertalerQt(QMainWindow):
             return
 
         try:
-            # NOTE: mqxliff_handler module has been removed
-            self.log("⚠ MQXLIFF import requires mqxliff_handler module which has been removed")
-            QMessageBox.critical(
-                self, "Module Removed",
-                "MQXLIFF import functionality has been removed (mqxliff_handler module no longer available)."
-            )
-            return
+            from modules.mqxliff_handler import MQXLIFFHandler
+
+            # Load the file
+            handler = MQXLIFFHandler()
+            if not handler.load(file_path):
+                QMessageBox.critical(
+                    self, "Error",
+                    "Failed to load memoQ XLIFF file."
+                )
+                return
+            
+            # Extract segments (including targets for pretranslated files)
+            mqxliff_segments = handler.extract_bilingual_segments()
+
+            if not mqxliff_segments:
+                QMessageBox.warning(
+                    self, "No Segments",
+                    "No segments found in the memoQ XLIFF file."
+                )
+                return
+
+            # Count pretranslated segments
+            pretranslated_count = sum(1 for s in mqxliff_segments if s.get('target', '').strip())
+
+            # Convert to internal Segment format
+            segments = []
+            for i, mq_seg in enumerate(mqxliff_segments):
+                # Map status from mqxliff
+                status = mq_seg.get('status', 'not_started')
+                if status not in ['not_started', 'pre_translated', 'draft', 'translated', 'confirmed', 'locked']:
+                    status = 'not_started'
+
+                segment = Segment(
+                    id=i + 1,
+                    source=mq_seg.get('source', ''),
+                    target=mq_seg.get('target', ''),
+                    status=status,
+                    match_percent=mq_seg.get('match_percent'),
+                    notes="",
+                )
+                segments.append(segment)
+            
+            # Store the handler and original path for round-trip export
+            self.mqxliff_handler = handler
+            self.mqxliff_source_file = file_path
             
             # Get language codes from handler
             source_lang = self._normalize_language_code(handler.source_lang)
