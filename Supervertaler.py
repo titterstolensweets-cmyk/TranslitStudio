@@ -32907,6 +32907,9 @@ class SupervertalerQt(QMainWindow):
             self._quit_event_filter = _QuitEventFilter(self)
             QApplication.instance().installEventFilter(self._quit_event_filter)
 
+        # Note: setQuitOnLastWindowClosed(False) is kept for compatibility with
+        # the _QuitEventFilter mechanism, but closeEvent now always quits.
+
         if not QSystemTrayIcon.isSystemTrayAvailable():
             print("[Tray] System tray unavailable on this platform – skipping")
             return
@@ -33182,6 +33185,10 @@ class SupervertalerQt(QMainWindow):
 
     def _tray_quit(self):
         """Real quit from tray menu – bypasses the close-to-tray hide."""
+        # Hide and remove tray icon before quitting to prevent orphaned icon
+        if hasattr(self, '_tray_icon') and self._tray_icon is not None:
+            self._tray_icon.hide()
+            self._tray_icon = None
         self._really_quit = True
         self.close()  # Triggers closeEvent which now does cleanup, then accepts
         QApplication.instance().quit()
