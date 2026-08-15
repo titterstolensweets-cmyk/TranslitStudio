@@ -33197,6 +33197,11 @@ class SupervertalerQt(QMainWindow):
         """Handle application close - cleanup hotkey processes and quit."""
         # Always perform cleanup and quit (close-to-tray behavior removed).
 
+        # Hide and remove tray icon to prevent orphaned icon in system tray
+        if hasattr(self, '_tray_icon') and self._tray_icon is not None:
+            self._tray_icon.hide()
+            self._tray_icon = None
+
         try:
             if hasattr(self, 'lookup_tab'):
                 # Clean up pynput hotkey manager (cross-platform)
