@@ -9327,7 +9327,7 @@ class SupervertalerQt(QMainWindow):
         # it on first Always-On activation would cause a one-time bounce
         # of neighbouring tray icons; doing it at startup folds that into
         # normal app launch instead.
-        self._ensure_alwayson_tray_icon()
+    #    self._ensure_alwayson_tray_icon()
         # Note: the Workbench tray icon itself is set up later by
         # _setup_tray_icon(), called from main() after construction.
 
@@ -11100,12 +11100,12 @@ class SupervertalerQt(QMainWindow):
         
         # Always-on voice indicator
         self.alwayson_indicator_label = QLabel("")
-        self.alwayson_indicator_label.setStyleSheet("font-size: 11px; font-weight: bold;")
-        self.alwayson_indicator_label.setToolTip(self.tr("Always-on voice listening status\nClick to toggle"))
-        self.alwayson_indicator_label.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.alwayson_indicator_label.mousePressEvent = lambda e: self._toggle_alwayson_from_statusbar()
+    #    self.alwayson_indicator_label.setStyleSheet("font-size: 11px; font-weight: bold;")
+    #    self.alwayson_indicator_label.setToolTip(self.tr("Always-on voice listening status\nClick to toggle"))
+    #    self.alwayson_indicator_label.setCursor(Qt.CursorShape.PointingHandCursor)
+    #    self.alwayson_indicator_label.mousePressEvent = lambda e: self._toggle_alwayson_from_statusbar()
         self.alwayson_indicator_label.hide()  # Hidden until enabled
-        progress_layout.addWidget(self.alwayson_indicator_label)
+    #    progress_layout.addWidget(self.alwayson_indicator_label)
 
         # Add as permanent widget (stays on right side)
         self.status_bar.addPermanentWidget(progress_frame)
@@ -11951,14 +11951,14 @@ class SupervertalerQt(QMainWindow):
         edit_menu.addSeparator()
 
         # Superlookup
-        superlookup_action = QAction(self.tr("🔍 &SuperLookup..."), self)
-        if IS_MACOS:
-            superlookup_action.setShortcut("Meta+Ctrl+L")  # Ctrl+Cmd+L on Mac
-        else:
-            superlookup_action.setShortcut("Ctrl+Alt+L")
-        # Tab indices: Grid=0, Project resources=1, Tools=2, Settings=3
-        superlookup_action.triggered.connect(lambda: self._go_to_superlookup() if hasattr(self, 'main_tabs') else None)  # Navigate to Superlookup
-        edit_menu.addAction(superlookup_action)
+    #    superlookup_action = QAction(self.tr("🔍 &SuperLookup..."), self)
+    #    if IS_MACOS:
+    #        superlookup_action.setShortcut("Meta+Ctrl+L")  # Ctrl+Cmd+L on Mac
+    #    else:
+    #        superlookup_action.setShortcut("Ctrl+Alt+L")
+    #    # Tab indices: Grid=0, Project resources=1, Tools=2, Settings=3
+    #    superlookup_action.triggered.connect(lambda: self._go_to_superlookup() if hasattr(self, 'main_tabs') else None)  # Navigate to Superlookup
+    #    edit_menu.addAction(superlookup_action)
         
         # QA Menu — quality assurance. Today it holds AI Proofreading; it's
         # designed as the umbrella for future traditional CAT-tool QA checks
@@ -11997,7 +11997,7 @@ class SupervertalerQt(QMainWindow):
         # the Settings one had already exploded (was landing on
         # SuperLookup since the v1.10 tab insertions).
         go_editor_action = QAction(self.tr("📝 &Grid"), self)
-        go_editor_action.triggered.connect(lambda: self._switch_main_tab("Editor"))
+        go_editor_action.triggered.connect(lambda: self._switch_main_tab("1Editor"))
         nav_menu.addAction(go_editor_action)
 
         go_tms_action = QAction(self.tr("💾 &TMs"), self)
@@ -12137,18 +12137,18 @@ class SupervertalerQt(QMainWindow):
         pdf_rescue_action.triggered.connect(self.open_pdf_rescue_window)
         tools_menu.addAction(pdf_rescue_action)
 
-        superlookup_action = QAction(f"🔍 Super&lookup ({format_shortcut_for_display('Ctrl+K')})...", self)
-        # Note: Actual Ctrl+K shortcut handled by QShortcut in setup_global_shortcuts()
-        # which calls show_concordance_search() for proper selection capture
-        superlookup_action.triggered.connect(self.show_concordance_search)
-        tools_menu.addAction(superlookup_action)
+    #    superlookup_action = QAction(f"🔍 Super&lookup ({format_shortcut_for_display('Ctrl+K')})...", self)
+    #    # Note: Actual Ctrl+K shortcut handled by QShortcut in setup_global_shortcuts()
+    #    # which calls show_concordance_search() for proper selection capture
+    #    superlookup_action.triggered.connect(self.show_concordance_search)
+    #    tools_menu.addAction(superlookup_action)
 
-        superbrowser_action = QAction(self.tr("🌐 Super&browser..."), self)
-        superbrowser_action.setToolTip(self.tr(
-            "ChatGPT, Claude, and Gemini side by side in one window, with "
-            "persistent logins – compare answers without switching tabs"))
-        superbrowser_action.triggered.connect(self.open_superbrowser_window)
-        tools_menu.addAction(superbrowser_action)
+    #    superbrowser_action = QAction(self.tr("🌐 Super&browser..."), self)
+    #    superbrowser_action.setToolTip(self.tr(
+    #        "ChatGPT, Claude, and Gemini side by side in one window, with "
+    #        "persistent logins – compare answers without switching tabs"))
+    #    superbrowser_action.triggered.connect(self.open_superbrowser_window)
+    #    tools_menu.addAction(superbrowser_action)
 
         tmx_editor_action = QAction(self.tr("✏️ T&MX Editor..."), self)
         tmx_editor_action.triggered.connect(self.open_tmx_editor_window)
@@ -12217,8 +12217,8 @@ class SupervertalerQt(QMainWindow):
         tools_menu.addAction(settings_action)
 
         # Help Menu
-        help_menu = menubar.addMenu(self.tr("&Help"))
-
+        # help_menu = menubar.addMenu(self.tr("&Help"))
+        help_menu = QMenu(self)  # Меню создается, но не прикрепляется к menubar
         # Documentation links (GitHub URLs for universal access)
         # Removed internal manual link – documentation migrated to GitBook
 
@@ -13016,7 +13016,7 @@ class SupervertalerQt(QMainWindow):
         # ===== 1. GRID TAB =====
         # Contains the translation grid
         grid_widget = self.create_grid_view_widget_for_home()
-        self.main_tabs.addTab(grid_widget, "📝 Editor")
+        self.main_tabs.addTab(grid_widget, "📝 2Editor")
         
         # ===== 2. TMs TAB =====
         # Promoted to a top-level tab in v1.9.422 (was previously nested
@@ -13147,22 +13147,22 @@ class SupervertalerQt(QMainWindow):
         # it's what registers the global hotkeys; the visible top tab
         # is a separate instance.
         # ============================================================
-        self._superlookup_top_widget = None
-        self._clipboard_top_widget = None
-        self._voice_top_widget = None
+        self._superlookup_top_widget = True
+        self._clipboard_top_widget = True
+        self._voice_top_widget = True
 
         from PyQt6.QtWidgets import QWidget as _QW
-        superlookup_placeholder = _QW()
-        self.main_tabs.addTab(superlookup_placeholder, "🔍 SuperLookup")
-        self.superlookup_tab_index = self.main_tabs.count() - 1
+        # superlookup_placeholder = _QW()
+        # self.main_tabs.addTab(superlookup_placeholder, "🔍 SuperLookup")
+        # self.superlookup_tab_index = self.main_tabs.count() - 1
+        
+        # clipboard_placeholder = _QW()
+        # self.main_tabs.addTab(clipboard_placeholder, "📋 Clipboard Manager")
+        # self.clipboard_tab_index = self.main_tabs.count() - 1
 
-        clipboard_placeholder = _QW()
-        self.main_tabs.addTab(clipboard_placeholder, "📋 Clipboard Manager")
-        self.clipboard_tab_index = self.main_tabs.count() - 1
-
-        voice_placeholder = _QW()
-        self.main_tabs.addTab(voice_placeholder, "🎤 Voice")
-        self.voice_tab_index = self.main_tabs.count() - 1
+        # voice_placeholder = _QW()
+        # self.main_tabs.addTab(voice_placeholder, "🎤 Voice")
+        # self.voice_tab_index = self.main_tabs.count() - 1
 
         # 4. SETTINGS
         settings_tab = self.create_settings_tab()
@@ -15122,7 +15122,7 @@ class SupervertalerQt(QMainWindow):
             
             # Create detached window
             self.lookup_detached_window = QDialog(self)
-            self.lookup_detached_window.setWindowTitle(self.tr("🔍 SuperLookup - Supervertaler Workbench"))
+            self.lookup_detached_window.setWindowTitle(self.tr("🔍 2SuperLookup - Supervertaler Workbench"))
             self.lookup_detached_window.setMinimumSize(600, 700)
             self.lookup_detached_window.resize(700, 800)
             
@@ -15176,7 +15176,7 @@ class SupervertalerQt(QMainWindow):
             # Header with reattach button
             header_layout = QVBoxLayout()
             
-            header_title = QLabel(self.tr("🔍 SuperLookup"))
+            header_title = QLabel(self.tr("🔍 3SuperLookup"))
             header_title.setStyleSheet("font-size: 16px; font-weight: bold; color: #333;")
             header_layout.addWidget(header_title)
             
@@ -15379,7 +15379,7 @@ class SupervertalerQt(QMainWindow):
             "• <b>Read</b> (green ✓): TM is used for matching segments<br>"
             "• <b>Write</b> (blue ✓): TM is updated with new translations<br>"
             "• <b>Bridge</b> (orange ✓): TM is visible to the Supervertaler for Trados plugin (Phase 2)<br>"
-            "• <b>🔍 SuperLookup</b> (teal ✓): TM is searched by SuperLookup (independent of Read)<br>"
+           # "• <b>🔍 SuperLookup</b> (teal ✓): TM is searched by SuperLookup (independent of Read)<br>"
             "• <b>Typical Setup</b>: Main TM (Read + Write) + Reference TMs (Read only)"
         )
         help_msg.setWordWrap(True)
@@ -15428,12 +15428,12 @@ class SupervertalerQt(QMainWindow):
         # them. Late-binding via the toggle_all_superlookup closure defined
         # further down alongside toggle_all_read/write/bridge.
         superlookup_header_checkbox = TealCheckmarkCheckBox(self.tr("Select All SuperLookup"))
-        bulk_layout.addWidget(superlookup_header_checkbox)
+    #    bulk_layout.addWidget(superlookup_header_checkbox)
 
         tm_clear_all_superlookup_btn = QPushButton(self.tr("Clear All SuperLookup"))
         tm_clear_all_superlookup_btn.setToolTip(self.tr("Uncheck the SuperLookup flag on every TM (exclude all TMs from SuperLookup)"))
         tm_clear_all_superlookup_btn.clicked.connect(lambda: toggle_all_superlookup(False))
-        bulk_layout.addWidget(tm_clear_all_superlookup_btn)
+    #    bulk_layout.addWidget(tm_clear_all_superlookup_btn)
 
         bulk_layout.addStretch()
         layout.addLayout(bulk_layout)
@@ -15443,8 +15443,8 @@ class SupervertalerQt(QMainWindow):
         # v1.10.247: 9 columns now – SuperLookup added at index 6, after
         # Bridge, so the four per-TM toggles (Read/Write/Bridge/SuperLookup)
         # cluster together. Last Modified moves to 7, Description to 8.
-        tm_table.setColumnCount(9)
-        tm_table.setHorizontalHeaderLabels(["TM Name", "Languages", "Entries", "Read", "Write", "Bridge", "🔍 SuperLookup", "Last Modified", "Description"])
+        tm_table.setColumnCount(8)
+        tm_table.setHorizontalHeaderLabels(["TM Name", "Languages", "Entries", "Read", "Write", "Bridge",  "Last Modified", "Description"]) # "🔍 SuperLookup",
         tm_table.horizontalHeader().setStretchLastSection(True)
         tm_table.setColumnWidth(0, 250)
         tm_table.setColumnWidth(1, 120)
@@ -15452,8 +15452,9 @@ class SupervertalerQt(QMainWindow):
         tm_table.setColumnWidth(3, 60)
         tm_table.setColumnWidth(4, 60)
         tm_table.setColumnWidth(5, 60)   # Bridge
-        tm_table.setColumnWidth(6, 100)  # SuperLookup
-        tm_table.setColumnWidth(7, 150)  # Last Modified
+   #    tm_table.setColumnWidth(6, 100)  # SuperLookup (уже было закомментировано)
+        tm_table.setColumnWidth(6, 150)  # Last Modified (ИСПРАВЛЕНО: сдвинули индекс с 7 на 6, т.к. колонок теперь 8, индексы с 0)
+        # tm_table.setColumnWidth(7, 150) # Старый индекс Last Modified, теперь это Description (растягивается автоматически)
         # v1.10.169: click-header-to-sort on the data columns (TM Name,
         # Languages, Entries, Last Modified, Description). The Read /
         # Write columns are checkbox widgets and won't sort meaningfully
@@ -20182,7 +20183,7 @@ class SupervertalerQt(QMainWindow):
             "• <b>Write</b> (blue ✓): Termbase is updated with new terms<br>"
             "• <b>Project</b> (pink ✓): Set as Project Termbase (highest priority, one at a time)<br>"
             "• <b>AI</b> (orange ✓): Send termbase terms to LLM with every translation (increases prompt size)<br>"
-            "• <b>🔍 SuperLookup</b> (teal ✓): Termbase is searched by SuperLookup (independent of Read)"
+          #  "• <b>🔍 SuperLookup</b> (teal ✓): Termbase is searched by SuperLookup (independent of Read)"
         )
         help_msg.setWordWrap(True)
         help_msg.setStyleSheet("background-color: #e3f2fd; padding: 8px; border-radius: 4px; color: #1976d2;")
@@ -20215,12 +20216,12 @@ class SupervertalerQt(QMainWindow):
         # v1.10.247: SuperLookup bulk toggles (include/exclude every termbase
         # from SuperLookup). Late-binding via toggle_all_tb_superlookup below.
         tb_superlookup_header_checkbox = TealCheckmarkCheckBox(self.tr("Select All SuperLookup"))
-        tb_bulk_layout.addWidget(tb_superlookup_header_checkbox)
+    #    tb_bulk_layout.addWidget(tb_superlookup_header_checkbox)
 
         tb_clear_all_superlookup_btn = QPushButton(self.tr("Clear All SuperLookup"))
         tb_clear_all_superlookup_btn.setToolTip(self.tr("Uncheck the SuperLookup flag on every termbase (exclude all from SuperLookup)"))
         tb_clear_all_superlookup_btn.clicked.connect(lambda: toggle_all_tb_superlookup(False))
-        tb_bulk_layout.addWidget(tb_clear_all_superlookup_btn)
+    #    tb_bulk_layout.addWidget(tb_clear_all_superlookup_btn)
 
         tb_bulk_layout.addStretch()
         left_layout.addLayout(tb_bulk_layout)
@@ -20232,10 +20233,10 @@ class SupervertalerQt(QMainWindow):
         # voice-dictation vocabulary biasing).
         # v1.10.247: added 🔍 SuperLookup column (per-termbase toggle for
         # SuperLookup inclusion, independent of Read). New column count = 10.
-        termbase_table.setColumnCount(10)
+        termbase_table.setColumnCount(8)
         termbase_table.setHorizontalHeaderLabels([
             "Type", "Name", "Languages", "Terms",
-            "Read", "Write", "Project", "AI", "🎤 Voice", "🔍 SuperLookup",
+            "Read", "Write", "Project", "AI", "🎤 Voice", # "🔍 SuperLookup",
         ])
         termbase_table.horizontalHeader().setStretchLastSection(False)
         termbase_table.setColumnWidth(0, 80)   # Type (Project/Background)
@@ -20246,8 +20247,8 @@ class SupervertalerQt(QMainWindow):
         termbase_table.setColumnWidth(5, 50)   # Write checkbox
         termbase_table.setColumnWidth(6, 60)   # Priority
         termbase_table.setColumnWidth(7, 40)   # AI checkbox
-        termbase_table.setColumnWidth(8, 70)   # 🎤 Voice checkbox
-        termbase_table.setColumnWidth(9, 100)  # 🔍 SuperLookup checkbox
+    #    termbase_table.setColumnWidth(8, 70)   # 🎤 Voice checkbox
+    #    termbase_table.setColumnWidth(9, 100)  # 🔍 SuperLookup checkbox
         termbase_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         termbase_table.setSelectionMode(QTableWidget.SelectionMode.SingleSelection)
         termbase_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)  # Disable inline editing
@@ -21647,7 +21648,7 @@ class SupervertalerQt(QMainWindow):
         # text – roughly a 8–9k-word project. Larger projects get a visible
         # warning that only the first part was analysed (chunk-and-dedup is a
         # planned follow-up, not silently pretending full coverage).
-        MAX_CHARS = 48_000
+        MAX_CHARS = 96_000
         
         def _do_extract_terms():
             """Extract terms and populate results table"""
@@ -23737,8 +23738,8 @@ class SupervertalerQt(QMainWindow):
         self.ai_settings_scroll = ai_scroll  # Store reference for scrolling to API keys
 
         # ===== TAB: Voice (commands & dictation, lives in Sidekick) =====
-        voice_tab = self._create_voice_settings_tab()
-        settings_tabs.addTab(scroll_area_wrapper(voice_tab), self.tr("🎤 Voice"))
+    #    voice_tab = self._create_voice_settings_tab()
+    #    settings_tabs.addTab(scroll_area_wrapper(voice_tab), self.tr("🎤 Voice"))
 
         # ===== TAB: Clipboard privacy (issue #246) =====
         clipboard_tab = self._create_clipboard_settings_tab()
@@ -28025,7 +28026,7 @@ class SupervertalerQt(QMainWindow):
                     self.log(f"🎧 Always-on listening started (faster-whisper '{model_name}')")
                 
                 # Start
-                self.voice_listener.start()
+            #    self.voice_listener.start()
                 self.log("🎧 Always-on listening started")
 
                 # Always-On is the only time the Pause-Always-On hotkey
@@ -30981,36 +30982,36 @@ class SupervertalerQt(QMainWindow):
         toolbar_layout.addWidget(autotag_btn)
 
         dictate_btn = QPushButton(f"🎤 Dictate{self._dictation_shortcut_label()}")
-        dictate_btn.setStyleSheet("background-color: #4CAF50; color: white; font-weight: bold; padding: 3px 5px; border: none; outline: none;")
-        dictate_btn.clicked.connect(self.start_voice_dictation)
-        dictate_btn.setToolTip(self.tr("Push-to-talk dictation – press your dictation shortcut (or click) to record, transcribe, and insert text. Set the key in Settings → Keyboard Shortcuts."))
-        toolbar_layout.addWidget(dictate_btn)
+    #    dictate_btn.setStyleSheet("background-color: #4CAF50; color: white; font-weight: bold; padding: 3px 5px; border: none; outline: none;")
+    #    dictate_btn.clicked.connect(self.start_voice_dictation)
+    #    dictate_btn.setToolTip(self.tr("Push-to-talk dictation – press your dictation shortcut (or click) to record, transcribe, and insert text. Set the key in Settings → Keyboard Shortcuts."))
+    #    toolbar_layout.addWidget(dictate_btn)
         
         # Always-On Voice toggle button
         alwayson_btn = QPushButton(self.tr("🎧 Always-On: OFF"))
         alwayson_btn.setCheckable(True)
         alwayson_btn.setChecked(False)
-        alwayson_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #757575;
-                color: white;
-                font-weight: bold;
-                padding: 3px 5px;
-                border-radius: 3px;
-            }
-            QPushButton:checked {
-                background-color: #2E7D32;
-            }
-            QPushButton:focus {
-                outline: none;
-            }
-        """)
-        alwayson_btn.setToolTip(self.tr("Always-On listening – continuously monitors the mic and transcribes automatically\nNo need to press the dictation shortcut"))
-        alwayson_btn.clicked.connect(lambda checked: self._toggle_alwayson_from_grid_btn(checked, alwayson_btn))
-        toolbar_layout.addWidget(alwayson_btn)
+    #   alwayson_btn.setStyleSheet("""
+    #    QPushButton {
+    #           background-color: #757575;
+    #            color: white;
+    #            font-weight: bold;
+    #            padding: 3px 5px;
+    #            border-radius: 3px;
+    #        }
+    #    QPushButton:checked {
+    #            background-color: #2E7D32;
+    #        }
+    #    QPushButton:focus {
+    #            outline: none;
+    #        }
+    #    """)
+    #    alwayson_btn.setToolTip(self.tr("Always-On listening – continuously monitors the mic and transcribes automatically\nNo need to press the dictation shortcut"))
+    #    alwayson_btn.clicked.connect(lambda checked: self._toggle_alwayson_from_grid_btn(checked, alwayson_btn))
+    #    toolbar_layout.addWidget(alwayson_btn)
         self.grid_alwayson_btn = alwayson_btn  # Store reference
 
-        toolbar_layout.addWidget(QLabel("|"))  # Separator
+    #    toolbar_layout.addWidget(QLabel("|"))  # Separator
 
         # Log button – opens the session log in its own movable window.
         # Replaces the old right-panel "Session Log" tab; the same action is
@@ -32455,12 +32456,12 @@ class SupervertalerQt(QMainWindow):
 
         # Voice dictation button
         dictate_btn = QPushButton(f"🎤 Dictate{self._dictation_shortcut_label()}")
-        dictate_btn.setStyleSheet("background-color: #4CAF50; color: white; font-weight: bold;")
-        dictate_btn.clicked.connect(self.start_voice_dictation)
-        dictate_btn.setToolTip(self.tr("Push-to-talk dictation – press your dictation shortcut (or click) to record, transcribe, and insert text. Set the key in Settings → Keyboard Shortcuts."))
+    #    dictate_btn.setStyleSheet("background-color: #4CAF50; color: white; font-weight: bold;")
+    #    dictate_btn.clicked.connect(self.start_voice_dictation)
+    #    dictate_btn.setToolTip(self.tr("Push-to-talk dictation – press your dictation shortcut (or click) to record, transcribe, and insert text. Set the key in Settings → Keyboard Shortcuts."))
 
         # Store reference to dictate button for state updates
-        editor_widget.dictate_btn = dictate_btn
+    #    editor_widget.dictate_btn = dictate_btn
 
         save_btn = QPushButton(self.tr("💾 Save"))
         save_btn.setStyleSheet("background-color: #4CAF50; color: white; font-weight: bold; padding: 3px 5px;")
@@ -67115,7 +67116,7 @@ class SuperlookupTab(QWidget):
         # Header and description – shown only when embedded in the main
         # window (hidden when inside the floating assistant, where the tab
         # label already identifies the feature and vertical space is precious).
-        self._header_label = QLabel(self.tr("🔍 SuperLookup"))
+        self._header_label = QLabel(self.tr("🔍 3SuperLookup"))
         self._header_label.setStyleSheet("font-size: 11pt; font-weight: bold; color: #1976D2;")
         layout.addWidget(self._header_label, 0)
 
