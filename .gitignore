@@ -1,1 +1,30 @@
-Nothing should be ignored based on the provided file changes. The modification of 'Supervertaler.py' is a source code file that should not be added to .gitignore.
+```
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+.ENV
+.python-version
+
+# Logs
+*.log
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Local configuration
+.env
+.env.local
+*.env
+```

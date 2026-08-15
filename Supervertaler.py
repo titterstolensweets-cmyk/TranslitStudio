@@ -11721,13 +11721,7 @@ class SupervertalerQt(QMainWindow):
 
         exit_action = QAction(self.tr("E&xit"), self)
         exit_action.setShortcut(QKeySequence.StandardKey.Quit)
-        # v1.10.278: route Exit / ⌘Q (and, on macOS, the role-merged
-        # "Quit Supervertaler" app-menu item this action becomes) through
-        # the real-quit path. Connecting to self.close() goes straight into
-        # closeEvent with _really_quit still False, so when close_to_tray is
-        # enabled the app merely *hides* — leaving macOS users unable to quit
-        # at all except by force-killing. _tray_quit sets _really_quit first
-        # so closeEvent terminates instead of backgrounding to the tray.
+        # Exit action triggers immediate application close (same as tray Quit).
         exit_action.triggered.connect(self._tray_quit)
         file_menu.addAction(exit_action)
 
@@ -32889,10 +32883,8 @@ class SupervertalerQt(QMainWindow):
     # ────────────────────────────────────────────────────────────────────
     #  System tray integration (cross-platform via QSystemTrayIcon).
     #
-    #  Three preferences live in settings.json under the "ui" section:
-    #    close_to_tray             – clicking the window's X hides instead of quits
+    #  Two preferences live in settings.json under the "ui" section:
     #    start_minimized_to_tray   – launch with no visible window (tray only)
-    #    close_to_tray_hint_shown  – internal: have we shown the first-time hint?
     #
     #  Toggleable from the tray icon's right-click menu, no Settings-dialog
     #  trip needed. On platforms with no system tray (e.g. headless Linux)
@@ -32980,11 +32972,7 @@ class SupervertalerQt(QMainWindow):
 
         menu.addSeparator()
 
-        self._tray_close_to_tray_action = QAction("Close to tray (instead of quit)", self)
-        self._tray_close_to_tray_action.setCheckable(True)
-        self._tray_close_to_tray_action.setChecked(bool(prefs.get("close_to_tray", False)))
-        self._tray_close_to_tray_action.toggled.connect(self._on_toggle_close_to_tray)
-        menu.addAction(self._tray_close_to_tray_action)
+        # Close to tray option removed - application now always closes on window close
 
         self._tray_start_minimized_action = QAction("Start minimized to tray", self)
         self._tray_start_minimized_action.setCheckable(True)
@@ -33025,16 +33013,13 @@ class SupervertalerQt(QMainWindow):
         QApplication.instance().setQuitOnLastWindowClosed(False)
 
     def _on_tray_activated(self, reason):
-        """Left-click the tray icon → toggle window visibility (Windows/Linux convention)."""
+        """Left-click the tray icon → quit the application (close-to-tray removed)."""
         from PyQt6.QtWidgets import QSystemTrayIcon
         if reason == QSystemTrayIcon.ActivationReason.Trigger:
-            if self.isVisible():
-                self.hide()
-            else:
-                self._tray_show_window()
+            self._tray_quit()
 
     def _tray_show_window(self):
-        """Restore, raise, and focus the main window from the tray."""
+        """Show window from tray (legacy - no longer used since close-to-tray removed)."""
         self.show()
         # Clear the minimized state if Qt set it during hide.
         self.setWindowState(self.windowState() & ~Qt.WindowState.WindowMinimized)
@@ -33045,62 +33030,36 @@ class SupervertalerQt(QMainWindow):
         """Dismiss Workbench when Esc is pressed on a "quick lookup"
         top tab.
 
-        Per-tab dismissal action:
+        Per-tab dismissal action (close-to-tray removed - now quits):
 
-        - **SuperLookup / Voice**: hide to the system tray (requires a
-          tray icon – without one, hiding would strand the user in an
-          invisible window, so those tabs fail closed).
-        - **Clipboard**: hand focus back to the app the user came
-          from, then hide to the tray (v1.10.343/344, user request:
-          "Esc should get out of the way"). Falls back to minimizing
-          to the taskbar when no tray icon exists, so Esc can never
-          silently do nothing. Any pending paste-back source is
-          consumed (Esc means "never mind"), so a later manual clip
-          click can't paste into a stale window.
+        - **SuperLookup / Clipboard / Voice**: quit the application
+          (same as Exit menu).
 
         Gate that always applies: the current tab is one of
         SuperLookup / Clipboard / Voice. On Editor / TMs / Termbases /
         AI / Settings, Esc keeps its natural editor / dialog /
         combo-box semantics (cancel-edit, close-popup, etc.).
 
-        Per-tab text-input gate (v1.10.19 refinement):
-
-        - **SuperLookup**: always hide regardless of focus. The user
-          observed (correctly) that SuperLookup is a single-purpose
-          query surface – there's no state to preserve, the search
-          field re-seeds on the next summon, and the only thing Esc
-          could reasonably mean here is "get me out of here". So we
-          skip the focus check and dismiss unconditionally.
-        - **Clipboard / Voice**: skip the dismiss if a text-input
-          widget has focus (QLineEdit / QTextEdit / QPlainTextEdit /
-          QAbstractSpinBox / editable QComboBox), to preserve
-          standard Qt-app conventions (Esc clears the field, closes
-          a popup, etc.) when the user might plausibly be typing
-          something they don't want to lose. Once focus is on the
-          list / tree / button / empty area, Esc dismisses to tray.
-
-        Wired in v1.10.17, made focus-aware in v1.10.18, made
-        always-hide-on-SuperLookup in v1.10.19.
+        Wired in v1.10.17, made focus-aware in v1.10.18, now always
+        quits in current version.
         """
         if not hasattr(self, 'main_tabs'):
             return
-        has_tray = getattr(self, '_tray_icon', None) is not None
 
         superlookup_idx = getattr(self, 'superlookup_tab_index', None)
         clipboard_idx = getattr(self, 'clipboard_tab_index', None)
         voice_idx = getattr(self, 'voice_tab_index', None)
         current = self.main_tabs.currentIndex()
 
-        # SuperLookup: unconditional hide (tray required).
+        # SuperLookup: unconditional quit (close-to-tray removed).
         if superlookup_idx is not None and current == superlookup_idx:
-            if has_tray:
-                self.hide()
+            self._tray_quit()
             return
 
         # v1.10.201: in-Workbench Ctrl+Alt+C return path. If the user
         # summoned the Clipboard tab from another Workbench tab
         # (Editor etc.) instead of from a different app, Esc should
-        # switch back to that prior tab — not hide Workbench. The
+        # switch back to that prior tab — not quit. The
         # prior tab index is set by _open_clipboard_after_copy when
         # it detects the captured source HWND matches Workbench's own.
         if (clipboard_idx is not None and current == clipboard_idx):
@@ -33125,54 +33084,14 @@ class SupervertalerQt(QMainWindow):
                 self._clipboard_prior_workbench_tab = None
                 return
 
-        # Clipboard / Voice: focus-aware hide.
-        focus_aware_indices = {clipboard_idx, voice_idx}
-        focus_aware_indices.discard(None)
-        if current not in focus_aware_indices:
-            # Some other tab – not a quick-lookup surface, do nothing.
-            return
-
-        try:
-            from PyQt6.QtWidgets import (
-                QLineEdit, QTextEdit, QPlainTextEdit, QComboBox,
-                QAbstractSpinBox,
-            )
-            focused = QApplication.focusWidget()
-            if focused is not None:
-                text_input_types = (
-                    QLineEdit, QTextEdit, QPlainTextEdit,
-                    QAbstractSpinBox,
-                )
-                if isinstance(focused, text_input_types):
-                    self.log(f"[Esc] ignored – text input focused "
-                             f"({type(focused).__name__})")
-                    return
-                if isinstance(focused, QComboBox) and focused.isEditable():
-                    self.log("[Esc] ignored – editable combo focused")
-                    return
-                # Walk up: a QLineEdit nested inside a custom
-                # composite widget should also count as a text input.
-                w = focused.parent()
-                hops = 0
-                while w is not None and hops < 5:
-                    if isinstance(w, text_input_types):
-                        return
-                    w = w.parent()
-                    hops += 1
-        except Exception:
-            # If the introspection fails for any reason, fall
-            # through to dismiss – safer than silently doing nothing.
-            pass
-
+        # All quick-lookup tabs (Clipboard/Voice): quit the application.
         if clipboard_idx is not None and current == clipboard_idx:
-            # Clipboard: focus back to the source app, window out of
-            # the way (tray if available, else minimize).
             self._dismiss_clipboard_summon()
             return
 
-        # Voice: hide to tray, as before.
-        if has_tray:
-            self.hide()
+        # Voice: quit the application (close-to-tray removed).
+        if voice_idx is not None and current == voice_idx:
+            self._tray_quit()
 
     def keyPressEvent(self, event):
         """Esc fallback for the quick-lookup dismiss (v1.10.345).
@@ -33208,21 +33127,7 @@ class SupervertalerQt(QMainWindow):
         super().keyPressEvent(event)
 
     def _dismiss_clipboard_summon(self):
-        """Esc on the Clipboard tab: hand focus back to the app the
-        user was summoned from (if one was captured) and get Workbench
-        out of the way – hidden to the system tray when a tray icon
-        exists (the notification-area icons by the clock, where the
-        Supervertaler icon lives), else minimized to the taskbar so
-        Esc can never silently do nothing.
-
-        The source window is activated FIRST, while Workbench still
-        owns the foreground (Windows grants foreground changes
-        requested by the foreground process; after hiding we'd be
-        refused – same ordering rule the paste-back path follows).
-        The captured source is consumed either way: Esc means "never
-        mind", so a later manual clip click must not paste-and-return
-        into a stale window.
-        """
+        """Esc on the Clipboard tab: quit the application (same as Exit menu)."""
         source = None
         widget = getattr(self, '_clipboard_top_widget', None)
         if widget is not None:
@@ -33239,24 +33144,10 @@ class SupervertalerQt(QMainWindow):
                 activate_foreground_window(source)
             except Exception as e:
                 print(f"[Clipboard] Esc source re-activate failed: {e}")
-        if getattr(self, '_tray_icon', None) is not None:
-            try:
-                self.log("[Esc] Clipboard dismissed → hidden to tray")
-            except Exception:
-                pass
-            self.hide()
-        else:
-            try:
-                self.log("[Esc] Clipboard dismissed → minimized "
-                         "(no tray icon)")
-            except Exception:
-                pass
-            self.showMinimized()
+        # Quit the application (same as Exit menu / tray Quit)
+        self._tray_quit()
 
-    def _on_toggle_close_to_tray(self, checked: bool):
-        prefs = self._load_settings_section("ui")
-        prefs["close_to_tray"] = bool(checked)
-        self._save_settings_section("ui", prefs)
+    # _on_toggle_close_to_tray removed - close-to-tray feature no longer exists
 
     def _on_toggle_start_minimized(self, checked: bool):
         prefs = self._load_settings_section("ui")
@@ -33296,30 +33187,8 @@ class SupervertalerQt(QMainWindow):
         QApplication.instance().quit()
 
     def closeEvent(self, event):
-        """Handle application close - cleanup hotkey processes"""
-        # Close-to-tray: hide instead of quit, unless the tray menu explicitly
-        # asked for a real quit. Skipped if the tray icon failed to initialise.
-        if (not getattr(self, "_really_quit", False)
-                and getattr(self, "_tray_icon", None) is not None):
-            prefs = self._load_settings_section("ui")
-            if prefs.get("close_to_tray", False):
-                event.ignore()
-                self.hide()
-                if not prefs.get("close_to_tray_hint_shown", False):
-                    try:
-                        from PyQt6.QtWidgets import QSystemTrayIcon
-                        self._tray_icon.showMessage(
-                            "Supervertaler is still running",
-                            "Click the tray icon to bring it back, or right-click "
-                            "for Quit.",
-                            QSystemTrayIcon.MessageIcon.Information,
-                            5000,
-                        )
-                    except Exception:
-                        pass
-                    prefs["close_to_tray_hint_shown"] = True
-                    self._save_settings_section("ui", prefs)
-                return
+        """Handle application close - cleanup hotkey processes and quit."""
+        # Always perform cleanup and quit (close-to-tray behavior removed).
 
         try:
             if hasattr(self, 'lookup_tab'):
@@ -33354,14 +33223,9 @@ class SupervertalerQt(QMainWindow):
         except Exception as e:
             print(f"[Superlookup] Error during hotkey cleanup: {e}")
 
-        # Accept the close event.
+        # Accept the close event and quit the application.
         event.accept()
-        # Because _setup_tray_icon flipped setQuitOnLastWindowClosed to False
-        # (so dialogs / hidden windows wouldn't terminate the app), we need
-        # to ask Qt to quit explicitly when close-to-tray is OFF – otherwise
-        # closing the main window would leave a headless process behind.
-        if getattr(self, "_tray_icon", None) is not None:
-            QApplication.instance().quit()
+        QApplication.instance().quit()
 
     def open_project(self):
         """Open a project file"""
